@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>年収の壁 早見ツール（目安）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --bg: #EEF0E9;
+    --surface: #FBFAF6;
+    --ink: #202822;
+    --ink-soft: #5A6459;
+    --line: #CBD0C4;
+    --tax: #33456B;
+    --tax-bg: #E3E8F1;
+    --ins: #2F5233;
+    --ins-bg: #E1E9DD;
+    --accent: #B5541E;
+    --accent-bg: #F4E4D6;
+    --warn-bg: #F6EED6;
+    --warn-border: #B99327;
+    --shadow-none: none;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171B16;
+      --surface: #1F251E;
+      --ink: #E9ECE4;
+      --ink-soft: #A6AE9E;
+      --line: #3A4136;
+      --tax: #8FA6D6;
+      --tax-bg: #263048;
+      --ins: #8FBF98;
+      --ins-bg: #223324;
+      --accent: #E39A6A;
+      --accent-bg: #3A2A1D;
+      --warn-bg: #362E17;
+      --warn-border: #8C711F;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171B16;
+    --surface: #1F251E;
+    --ink: #E9ECE4;
+    --ink-soft: #A6AE9E;
+    --line: #3A4136;
+    --tax: #8FA6D6;
+    --tax-bg: #263048;
+    --ins: #8FBF98;
+    --ins-bg: #223324;
+    --accent: #E39A6A;
+    --accent-bg: #3A2A1D;
+    --warn-bg: #362E17;
+    --warn-border: #8C711F;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 20px 0;
+  }
+
+  header.page-head {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+
+  .kicker {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Zen Old Mincho', serif;
+    font-weight: 700;
+    font-size: clamp(26px, 5vw, 34px);
+    line-height: 1.4;
+    margin: 0 0 10px;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  /* 注意書き */
+  .notice {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    margin: 20px 0 28px;
+  }
+  .notice strong {
+    display: block;
+    font-size: 14.5px;
+    margin-bottom: 4px;
+  }
+
+  section { margin-bottom: 36px; }
+
+  h2 {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2 .no {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+  }
+
+  /* 入力フォーム */
+  .field { margin-bottom: 20px; }
+  .field label.field-label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .field .sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .income-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 24px;
+  }
+  .income-num {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 6px 10px;
+    min-width: 108px;
+    justify-content: flex-end;
+  }
+  .income-num input {
+    width: 64px;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: right;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+  }
+  .income-num input:focus { outline: none; }
+  .income-num .unit { font-size: 13px; color: var(--ink-soft); }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .seg button {
+    appearance: none;
+    border: none;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 9px 16px;
+    cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .checks { display: flex; flex-direction: column; gap: 10px; }
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .check-row input {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .check-row .txt { font-size: 14px; }
+  .check-row .txt .d { display:block; font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+  /* スケール（縦の壁の可視化） */
+  .scale-outer {
+    display: flex;
+    gap: 18px;
+    align-items: stretch;
+  }
+  .scale-track {
+    position: relative;
+    width: 34px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, var(--surface), var(--surface));
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .scale-lines { position: relative; flex: 1; min-height: 420px; }
+  .wline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--line);
+  }
+  .wline .tick {
+    position: absolute;
+    left: -8px;
+    top: -4px;
+    width: 8px;
+    height: 1px;
+    background: var(--ink-soft);
+  }
+  .wmark {
+    position: absolute;
+    left: 0; right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wmark .bar {
+    flex-shrink: 0;
+    width: 34px;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .wmark.tax .bar { background: var(--tax); }
+  .wmark.ins .bar { background: var(--ins); }
+  .wmark .lbl {
+    font-size: 12.5px;
+    line-height: 1.4;
+    padding: 3px 0;
+  }
+  .wmark .lbl .amt { font-weight: 700; font-size: 13.5px; }
+  .wmark.tax .lbl .amt { color: var(--tax); }
+  .wmark.ins .lbl .amt { color: var(--ins); }
+  .wmark .lbl .nm { color: var(--ink-soft); }
+
+  .you {
+    position: absolute;
+    left: -10px;
+    width: 54px;
+    transform: translateY(-50%);
+  }
+  .you .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1.5px var(--accent);
+    margin: 0 auto;
+  }
+  .you-line {
+    position: absolute;
+    left: 34px; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.55;
+  }
+
+  .fill {
+    position: absolute;
+    left: 1px; right: 1px; bottom: 1px;
+    background: var(--accent-bg);
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* 結果リスト */
+  .result-list { display: flex; flex-direction: column; gap: 10px; }
+  .result-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line);
+    border-radius: 3px;
+    padding: 13px 14px;
+  }
+  .result-item.tax { border-left-color: var(--tax); }
+  .result-item.ins { border-left-color: var(--ins); }
+  .result-item .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .result-item .name { font-size: 14.5px; font-weight: 700; }
+  .result-item .tag {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .result-item.tax .tag { background: var(--tax-bg); color: var(--tax); }
+  .result-item.ins .tag { background: var(--ins-bg); color: var(--ins); }
+  .result-item .amount {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+  .result-item .amount b { color: var(--ink); font-size: 15px; }
+  .result-item .status {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .result-item .status.under { color: var(--ins); }
+  .result-item .status.over { color: var(--accent); }
+  .result-item .note {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+    padding-top: 18px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 20px 14px 0; }
+    .scale-outer { gap: 10px; }
+    .wmark .lbl { font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="kicker">相談支援の現場向け・目安計算ツール</div>
+    <h1>年収の壁<br>早見ツール</h1>
+    <p class="lede">年収と状況を入力すると、税金・社会保険にまつわる主な「壁」との位置関係を確認できます。制度は毎年見直されているため、あくまで目安としてご利用ください。</p>
+  </header>
+
+  <div class="notice">
+    <strong>表示される金額はすべて目安です</strong>
+    生命保険料控除・住宅ローン控除、通勤手当の算入有無など個別の事情によって、実際の金額は変わります。正式な判定は源泉徴収票や自治体・年金事務所・税務署への確認が必要です。制度の適用時期と、給与への反映時期（源泉徴収）にもズレがあります。
+  </div>
+
+  <section id="input-section">
+    <h2><span class="no">01</span>状況を入力</h2>
+
+    <div class="field">
+      <label class="field-label" for="income-range">年収（給与収入・額面）</label>
+      <div class="income-row">
+        <input type="range" id="income-range" min="0" max="250" step="1" value="103">
+        <div class="income-num">
+          <input type="number" id="income-num" min="0" max="400" value="103">
+          <span class="unit">万円</span>
+        </div>
+      </div>
+      <div class="sub">賞与を含む、税引き前・社会保険料天引き前の金額を入力してください。</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">対象年分</label>
+      <div class="seg" role="group" aria-label="対象年分">
+        <button type="button" data-year="2025" aria-pressed="false">2025年分（令和7年）</button>
+        <button type="button" data-year="2026" aria-pressed="true">2026年分（令和8年）</button>
+      </div>
+      <div class="sub">2026年分の所得税は年分としては2026年から適用されますが、毎月の給与天引きへの反映は2027年1月以降です。</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">勤務先の従業員数（社会保険の適用対象事業所かどうか）</label>
+      <div class="seg" role="group" aria-label="勤務先の従業員数" id="employer-seg">
+        <button type="button" data-employer="large" aria-pressed="false">51人以上</button>
+        <button type="button" data-employer="small" aria-pressed="false">51人未満</button>
+        <button type="button" data-employer="unknown" aria-pressed="true">わからない</button>
+      </div>
+      <div class="sub">106万円の壁は「従業員51人以上の事業所に勤務」であることが前提条件のひとつです。51人未満の事業所では、通常は130万円が扶養から外れる基準になります（企業規模要件は2027年10月以降、段階的に縮小・撤廃される予定です）。</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">あてはまるものを選択（複数可）</label>
+      <div class="checks">
+        <label class="check-row">
+          <input type="checkbox" id="chk-student">
+          <span class="txt">19歳以上23歳未満の学生など、特定の親族として扶養に入れたい<span class="d">大学生年代の子など。社会保険の扶養基準が緩和されます。</span></span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="chk-senior">
+          <span class="txt">60歳以上、または障害厚生年金の対象となる程度の障害がある<span class="d">社会保険の扶養基準が緩和されます（年金の受給額も収入に含みます）。</span></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section id="scale-section">
+    <h2><span class="no">02</span>年収と壁の位置関係</h2>
+    <div class="scale-outer">
+      <div class="scale-track">
+        <div class="fill" id="fill-bar"></div>
+      </div>
+      <div class="scale-lines" id="scale-lines"></div>
+    </div>
+  </section>
+
+  <section id="result-section">
+    <h2><span class="no">03</span>該当する壁の一覧</h2>
+    <div class="result-list" id="result-list"></div>
+  </section>
+
+  <section id="pension-section">
+    <h2><span class="no">04</span>年金収入の場合（雑所得）</h2>
+    <p class="lede" style="margin-bottom:16px;">公的年金等（国民年金・厚生年金など）のみを受け取っている場合の目安です。給与収入と年金収入の両方がある場合は、それぞれの所得を合算して判定する必要があるため、この結果はそのまま使えません。</p>
+
+    <div class="field">
+      <label class="field-label" for="pension-num">年金収入（年額）</label>
+      <div class="income-row">
+        <input type="range" id="pension-range" min="0" max="300" step="1" value="150">
+        <div class="income-num">
+          <input type="number" id="pension-num" min="0" max="500" value="150">
+          <span class="unit">万円</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">年齢</label>
+      <div class="seg" role="group" aria-label="年齢区分" id="age-seg">
+        <button type="button" data-age="65plus" aria-pressed="true">65歳以上</button>
+        <button type="button" data-age="under65" aria-pressed="false">65歳未満</button>
+      </div>
+    </div>
+
+    <div class="result-list" id="pension-result-list"></div>
+    <p class="sub" style="margin-top:12px;">単身・扶養親族なし・3級地の市区町村を前提にした目安です。扶養親族がいる場合や1級地・2級地の自治体では、非課税ラインが変わります。公的年金等控除は年金収入が65歳以上330万円・65歳未満130万円を超えると段階的に減っていきます。</p>
+  </section>
+
+  <footer>
+    出典：令和8年度税制改正の大綱（財務省）、租税特別措置法・所得税法関連通達、厚生労働省の社会保険適用拡大に関する資料等を参照し、代表的な数値を簡略化して掲載しています。金額・適用時期は今後の政省令・通達で変更される可能性があります。<br>
+    最終確認日：2026年9月（この日付・金額は運用時に更新してください）
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------------------------------------------------------------
+  // 壁の定義（毎年ここを更新する）
+  // amount は「万円」単位。student_amount / senior_amount は
+  // 該当する属性が選ばれた場合に差し替える金額（社保の扶養基準）
+  // ---------------------------------------------------------------
+  var YEARS = {
+    "2025": {
+      label: "2025年分（令和7年）",
+      tax: [
+        { id:"resident", name:"住民税がかかり始めるライン", amount:103, cat:"tax",
+          note:"給与所得控除65万円＋住民税の非課税限度額（単身・3級地の目安）38万円で算出。1級地・2級地の自治体や扶養親族がいる場合は、これより高くなります。" },
+        { id:"income_start", name:"本人に所得税がかかり始めるライン", amount:123, cat:"tax",
+          note:"基礎控除58万円＋給与所得控除65万円。" },
+        { id:"dependent", name:"配偶者控除・扶養控除の対象となる年収上限", amount:123, cat:"tax",
+          note:"この額を超えると配偶者・親などの控除対象から外れます。" },
+        { id:"spouse_full", name:"配偶者特別控除が満額（38万円）になる上限", amount:150, cat:"tax" },
+        { id:"spouse_zero", name:"配偶者特別控除がゼロになるライン", amount:201.6, cat:"tax" }
+      ],
+      insurance: [
+        { id:"106", name:"自分の勤務先の社会保険に加入する基準（106万円の壁）", amount:106, cat:"ins", requiresLargeEmployer:true,
+          note:"①週20時間以上勤務②月額賃金8.8万円以上③雇用見込み2ヶ月超④学生でない⑤勤務先の従業員数51人以上、をすべて満たす場合に適用されます。" },
+        { id:"dep", name:"配偶者等の社会保険の扶養から外れる基準（130万円の壁）", amount:130, student_amount:130, senior_amount:180, cat:"ins",
+          note:"106万円の壁の条件（従業員51人以上の勤務先など）に当てはまらない場合に適用される基準です。学生など特定の親族は2025年10月から150万円に緩和されます。60歳以上・障害厚生年金相当の方は180万円未満です。" }
+      ]
+    },
+    "2026": {
+      label: "2026年分（令和8年）",
+      tax: [
+        { id:"resident", name:"住民税がかかり始めるライン", amount:112, cat:"tax",
+          note:"給与所得控除74万円＋住民税の非課税限度額（単身・3級地の目安）38万円で算出。1級地・2級地の自治体や扶養親族がいる場合は、これより高くなります。住民税は前年の所得を基準に翌年度課税されるため、実際に反映されるのは翌年度分の住民税です。" },
+        { id:"income_start", name:"本人に所得税がかかり始めるライン", amount:178, cat:"tax",
+          note:"基礎控除104万円＋給与所得控除の最低保障74万円。給与天引きへの反映は2027年1月以降で、2026年中は年末調整で精算されます。" },
+        { id:"dependent", name:"配偶者控除・扶養控除の対象となる年収上限", amount:136, cat:"tax",
+          note:"この額を超えると配偶者・親などの控除対象から外れます。" },
+        { id:"spouse_full", name:"配偶者特別控除が満額（38万円）になる上限", amount:169, cat:"tax" },
+        { id:"spouse_zero", name:"配偶者特別控除がゼロになるライン", amount:207, cat:"tax" },
+        { id:"student_tax", name:"学生など特定の親族特別控除が満額になる上限", amount:150, cat:"tax", onlyIf:"student",
+          note:"150万円を超えても197万円程度まで段階的に控除が残ります。" }
+      ],
+      insurance: [
+        { id:"106", name:"自分の勤務先の社会保険に加入する基準（106万円の壁）", amount:106, cat:"ins", requiresLargeEmployer:true,
+          note:"2026年10月に賃金要件（月額8.8万円）は撤廃予定で、撤廃後は「週20時間以上勤務」が基準になります。勤務先の従業員数51人以上という要件は残り、2027年10月から36人以上、2029年10月から21人以上と段階的に縮小される予定です。" },
+        { id:"dep", name:"配偶者等の社会保険の扶養から外れる基準（130万円の壁）", amount:130, student_amount:150, senior_amount:180, cat:"ins",
+          note:"106万円の壁の条件（従業員51人以上の勤務先など）に当てはまらない場合に適用される基準です。2026年4月から、一時的な収入増では扶養を外れない「労働契約書ベース」の判定に変わる予定です。学生など特定の親族は150万円、60歳以上・障害厚生年金相当の方は180万円未満です。" }
+      ]
+    }
+  };
+
+  var SCALE_MAX = 230; // 万円。可視化スケールの上限
+
+  var KISO_KOUJO = { "2025": 58, "2026": 104 }; // 所得税の基礎控除（万円）
+  var NENKIN_KOUJO = { "65plus": 110, "under65": 60 }; // 公的年金等控除の最低保障額（万円）
+  var JUMINZEI_KISO = 38; // 住民税の非課税限度額（単身・扶養なし・3級地の所得ベース、万円）
+
+  var els = {
+    range: document.getElementById('income-range'),
+    num: document.getElementById('income-num'),
+    yearBtns: document.querySelectorAll('#input-section .seg:not(#employer-seg) button'),
+    employerBtns: document.querySelectorAll('#employer-seg button'),
+    chkStudent: document.getElementById('chk-student'),
+    chkSenior: document.getElementById('chk-senior'),
+    lines: document.getElementById('scale-lines'),
+    fill: document.getElementById('fill-bar'),
+    results: document.getElementById('result-list'),
+    pensionRange: document.getElementById('pension-range'),
+    pensionNum: document.getElementById('pension-num'),
+    ageBtns: document.querySelectorAll('#age-seg button'),
+    pensionResults: document.getElementById('pension-result-list')
+  };
+
+  var state = { income: 103, year: "2026", student: false, senior: false, employer: "unknown", pension: 150, age: "65plus" };
+
+  function loadState(){
+    try {
+      var saved = JSON.parse(localStorage.getItem('nenshu-kabe-state') || 'null');
+      if (saved && typeof saved === 'object') {
+        if (typeof saved.income === 'number') state.income = saved.income;
+        if (saved.year === '2025' || saved.year === '2026') state.year = saved.year;
+        state.student = !!saved.student;
+        state.senior = !!saved.senior;
+        if (saved.employer === 'large' || saved.employer === 'small' || saved.employer === 'unknown') state.employer = saved.employer;
+        if (typeof saved.pension === 'number') state.pension = saved.pension;
+        if (saved.age === '65plus' || saved.age === 'under65') state.age = saved.age;
+      }
+    } catch(e) {}
+  }
+
+  function saveState(){
+    try { localStorage.setItem('nenshu-kabe-state', JSON.stringify(state)); } catch(e) {}
+  }
+
+  function activeWalls(){
+    var y = YEARS[state.year];
+    var list = [];
+    y.tax.forEach(function(w){
+      if (w.onlyIf === 'student' && !state.student) return;
+      list.push(Object.assign({}, w));
+    });
+    y.insurance.forEach(function(w){
+      if (w.requiresLargeEmployer && state.employer === 'small') return;
+      var item = Object.assign({}, w);
+      if (state.senior && w.senior_amount != null) item.amount = w.senior_amount;
+      else if (state.student && w.student_amount != null) item.amount = w.student_amount;
+      if (w.requiresLargeEmployer && state.employer === 'unknown') {
+        item.note = (item.note || '') + '（勤務先の従業員数が51人未満の場合はこの基準は対象外で、130万円の基準が適用されます）';
+      }
+      list.push(item);
+    });
+    return list.sort(function(a,b){ return a.amount - b.amount; });
+  }
+
+  function render(){
+    els.range.value = state.income;
+    els.num.value = state.income;
+    els.yearBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.year === state.year ? 'true' : 'false');
+    });
+    els.employerBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.employer === state.employer ? 'true' : 'false');
+    });
+    els.chkStudent.checked = state.student;
+    els.chkSenior.checked = state.senior;
+
+    var walls = activeWalls();
+
+    // スケール描画
+    els.lines.innerHTML = '';
+    var incomePct = Math.min(state.income, SCALE_MAX) / SCALE_MAX * 100;
+    els.fill.style.height = incomePct + '%';
+
+    walls.forEach(function(w){
+      var pct = Math.min(w.amount, SCALE_MAX) / SCALE_MAX * 100;
+      var mark = document.createElement('div');
+      mark.className = 'wmark ' + w.cat;
+      mark.style.bottom = pct + '%';
+      mark.innerHTML = '<span class="bar"></span><span class="lbl"><span class="amt">' + fmt(w.amount) + '万円</span><span class="nm"> ' + w.name + '</span></span>';
+      els.lines.appendChild(mark);
+    });
+
+    var you = document.createElement('div');
+    you.className = 'you';
+    you.style.bottom = incomePct + '%';
+    you.innerHTML = '<div class="dot"></div>';
+    els.lines.appendChild(you);
+    var youLine = document.createElement('div');
+    youLine.className = 'you-line';
+    youLine.style.bottom = incomePct + '%';
+    els.lines.appendChild(youLine);
+
+    // リスト描画
+    els.results.innerHTML = '';
+    walls.forEach(function(w){
+      var diff = w.amount - state.income;
+      var over = diff < 0;
+      var div = document.createElement('div');
+      div.className = 'result-item ' + w.cat;
+      div.innerHTML =
+        '<div class="top">' +
+          '<span class="name">' + w.name + '</span>' +
+          '<span class="tag">' + (w.cat === 'tax' ? '税金' : '社会保険') + '</span>' +
+        '</div>' +
+        '<div class="amount">基準額 <b>' + fmt(w.amount) + '万円</b></div>' +
+        '<div class="status ' + (over ? 'over' : 'under') + '">' +
+          (over ? '基準額を ' + fmt(Math.abs(diff)) + ' 万円 超えています' : '基準額まで あと ' + fmt(diff) + ' 万円') +
+        '</div>' +
+        (w.note ? '<div class="note">' + w.note + '</div>' : '') +
+      '';
+      els.results.appendChild(div);
+    });
+
+    saveState();
+  }
+
+  function renderAll(){
+    render();
+    renderPension();
+  }
+
+  function renderPension(){
+    els.pensionRange.value = state.pension;
+    els.pensionNum.value = state.pension;
+    els.ageBtns.forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.age === state.age ? 'true' : 'false');
+    });
+
+    var nenkinKoujo = NENKIN_KOUJO[state.age];
+    var kisoKoujo = KISO_KOUJO[state.year];
+    var incomeTaxLine = kisoKoujo + nenkinKoujo;
+    var juminzeiLine = JUMINZEI_KISO + nenkinKoujo;
+
+    var walls = [
+      { name:"所得税がかからないライン", amount:incomeTaxLine, cat:"tax",
+        note:"公的年金等控除" + nenkinKoujo + "万円＋基礎控除" + kisoKoujo + "万円（" + YEARS[state.year].label + "）で計算した目安です。" },
+      { name:"住民税（所得割）がかからないライン", amount:juminzeiLine, cat:"tax",
+        note:"公的年金等控除" + nenkinKoujo + "万円＋住民税の非課税限度額（単身・3級地の目安）38万円で計算した目安です。住民税の基礎控除は税制改正の対象外のため年によって変わりません。" }
+    ];
+
+    els.pensionResults.innerHTML = '';
+    walls.forEach(function(w){
+      var diff = w.amount - state.pension;
+      var over = diff < 0;
+      var div = document.createElement('div');
+      div.className = 'result-item ' + w.cat;
+      div.innerHTML =
+        '<div class="top">' +
+          '<span class="name">' + w.name + '</span>' +
+          '<span class="tag">税金</span>' +
+        '</div>' +
+        '<div class="amount">基準額 <b>' + fmt(w.amount) + '万円</b></div>' +
+        '<div class="status ' + (over ? 'over' : 'under') + '">' +
+          (over ? '基準額を ' + fmt(Math.abs(diff)) + ' 万円 超えています' : '基準額まで あと ' + fmt(diff) + ' 万円') +
+        '</div>' +
+        '<div class="note">' + w.note + '</div>';
+      els.pensionResults.appendChild(div);
+    });
+  }
+
+  function fmt(n){
+    var r = Math.round(n * 10) / 10;
+    return (r % 1 === 0) ? String(r) : String(r);
+  }
+
+  els.range.addEventListener('input', function(){
+    state.income = Number(els.range.value);
+    renderAll();
+  });
+  els.num.addEventListener('input', function(){
+    var v = Number(els.num.value);
+    if (!isNaN(v)) { state.income = Math.max(0, Math.min(400, v)); renderAll(); }
+  });
+  els.yearBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      state.year = b.dataset.year;
+      renderAll();
+    });
+  });
+  els.chkStudent.addEventListener('change', function(){
+    state.student = els.chkStudent.checked;
+    renderAll();
+  });
+  els.chkSenior.addEventListener('change', function(){
+    state.senior = els.chkSenior.checked;
+    renderAll();
+  });
+  els.employerBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      state.employer = b.dataset.employer;
+      renderAll();
+    });
+  });
+  els.pensionRange.addEventListener('input', function(){
+    state.pension = Number(els.pensionRange.value);
+    renderAll();
+  });
+  els.pensionNum.addEventListener('input', function(){
+    var v = Number(els.pensionNum.value);
+    if (!isNaN(v)) { state.pension = Math.max(0, Math.min(500, v)); renderAll(); }
+  });
+  els.ageBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      state.age = b.dataset.age;
+      renderAll();
+    });
+  });
+
+  loadState();
+  renderAll();
+})();
+</script>
+</body>
+</html>
